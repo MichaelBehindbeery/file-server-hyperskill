@@ -4,21 +4,23 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.io.*;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 public class Client {
+
+    public static Scanner scanner = new Scanner(System.in);
 
     private static final String IP_ADDRESS = "127.0.0.1";
 
     private static final int PORT = 1024;
 
-    private static void reciveMSG(DataInputStream input) throws IOException {
+    public static String reciveMSG(DataInputStream input) throws IOException {
         String msg = input.readUTF();
-        System.out.println("Received: " + msg);
+        return msg;
     }
 
-    private static void sendMSG(DataOutputStream output, String msg) throws IOException {
+    public static void sendMSG(DataOutputStream output, String msg) throws IOException {
         output.writeUTF(msg);
-        System.out.println("Sent: " + msg);
     }
 
 
@@ -28,13 +30,42 @@ public class Client {
                 DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             ){
                 System.out.println("Client started!");
-                sendMSG(outputStream, "Give me everything you have!");
-                reciveMSG(inputStream);
+                menu(outputStream , inputStream ,socket);
             } catch (UnknownHostException e) {
                 System.err.println(e.getMessage());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
+    }
+
+    private static void menu(DataOutputStream output , DataInputStream input , Socket socket) throws Exception {
+        System.out.println("Enter action (1 - get a file, 2 - create a file, 3 - delete a file): ");;
+        int command = scanner.nextInt();
+        switch (command){
+            case 2:
+                sendMSG(output , "PUT");
+                putFile(output,input);
+                break;
+
+        }
+    }
+
+    private static void putFile(DataOutputStream output, DataInputStream input ) throws Exception{
+        System.out.print("Enter filename: ");
+        new Command(output).join();
+
+        System.out.print("Enter file content: ");
+        new Command(output).join();
+
+        System.out.println("The request was sent.");
+
+        String statusCode = reciveMSG(input);
+        if(statusCode.equals("403")) {
+            //System.out.println("");
+        }else {
+            System.out.println("The response says that file was created!");
+        }
+
     }
 
 }

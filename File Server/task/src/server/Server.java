@@ -1,16 +1,14 @@
 package server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
+import client.Client;
+
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Server {
-
     private static final String IP_ADDRESS = "127.0.0.1";
 
     private static final int PORT = 1024;
@@ -24,8 +22,7 @@ public class Server {
                     DataInputStream inputStream = new DataInputStream(socket.getInputStream());
                     DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             ) {
-                reciveMSG(inputStream);
-                sendMSG(outputStream, "All files were sent!");
+                clientHandler(socket , inputStream , outputStream);
             } catch (UnknownHostException e) {
                 System.err.println(e.getMessage());
             } catch (IOException e) {
@@ -44,26 +41,33 @@ public class Server {
         System.out.println(msg);
     }
 
-    private static void menu(DataOutputStream output , DataInputStream input , Socket socket) throws IOException{
-        sendMSG(output ,"Enter action (1 - get a file, 2 - create a file, 3 - delete a file): ");
-        while(!socket.isClosed()){
-            sendMSG(output ,"Enter action (1 - get a file, 2 - create a file, 3 - delete a file): ");
-            String choice = input.readUTF();
-            switch (choice) {
-                case "1":
+    private static void clientHandler(Socket socket , DataInputStream input , DataOutputStream output) throws IOException {
 
+        while(!socket.isClosed()){
+            String commandToExecute = input.readUTF();
+            switch (commandToExecute){
+                case "PUT":
+                    PUT(output,input);
+                    break;
             }
         }
     }
 
-    private static void get(DataOutputStream output, DataInputStream input ) throws IOException{
-        sendMSG(output ,"Enter filename: ");
-        String fileName = input.readUTF();
-        File file = new File("server/data/folder/" + fileName);
-        if(!file.exists()){
-            sendMSG(output, "404");
-        }
 
+    private static void PUT(DataOutputStream output , DataInputStream input) throws IOException {
+        String fileName = input.readUTF();
+        File file = new File("C:\\Users\\micha\\IdeaProjects\\File Server\\File Server\\task\\src\\server\\data\\folder\\" + fileName);
+        if(file.exists()) {
+            output.writeUTF("403");
+        }else {
+            String fileContent = input.readUTF();
+            file.createNewFile();
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(fileContent);
+            output.writeUTF("200");
+        }
     }
+
+
 
 }

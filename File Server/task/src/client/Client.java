@@ -40,12 +40,17 @@ public class Client {
 
     private static void menu(DataOutputStream output , DataInputStream input , Socket socket) throws Exception {
         System.out.println("Enter action (1 - get a file, 2 - create a file, 3 - delete a file): ");;
-        int command = scanner.nextInt();
+        String command = scanner.next();
         switch (command){
-            case 2:
+            case "2":
                 sendMSG(output , "PUT");
                 putFile(output,input);
                 break;
+            case "3":
+                sendMSG(output, "DELETE");
+                deleteFile(output,input);
+                break;
+
 
         }
     }
@@ -61,9 +66,25 @@ public class Client {
 
         String statusCode = reciveMSG(input);
         if(statusCode.equals("403")) {
-            //System.out.println("");
+            System.out.println("The response says that file already exists");
         }else {
             System.out.println("The response says that file was created!");
+        }
+
+    }
+
+    private static void deleteFile(DataOutputStream output, DataInputStream input ) throws Exception{
+        System.out.print("Enter filename: ");
+
+        new Command(output).join();
+
+        System.out.println("The request was sent.");
+
+        String statusCode = reciveMSG(input);
+        if(statusCode.equals("403")) {
+            System.out.println("The response says that file doesn't exist");
+        }else {
+            System.out.println("The response says that the file was successfully deleted!");
         }
 
     }

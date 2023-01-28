@@ -49,6 +49,9 @@ public class Server {
                 case "PUT":
                     PUT(output,input);
                     break;
+                case "DELETE":
+                    DELETE(output,input);
+                    break;
             }
         }
     }
@@ -61,12 +64,27 @@ public class Server {
             output.writeUTF("403");
         }else {
             String fileContent = input.readUTF();
-            file.createNewFile();
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(fileContent);
+            try(PrintWriter fileWriter = new PrintWriter(file)){
+                fileWriter.print(fileContent);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
             output.writeUTF("200");
         }
     }
+
+    private static void DELETE(DataOutputStream output , DataInputStream input) throws IOException {
+        String fileName = input.readUTF();
+        File file = new File("C:\\Users\\micha\\IdeaProjects\\File Server\\File Server\\task\\src\\server\\data\\folder\\" + fileName);
+        if(!file.exists()) {
+            output.writeUTF("404");
+        }else {
+            file.delete();
+            output.writeUTF("200");
+        }
+    }
+
+
 
 
 
